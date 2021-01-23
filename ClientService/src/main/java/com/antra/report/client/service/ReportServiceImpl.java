@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,32 +73,66 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportVO generateReportsSync(ReportRequest request) {
+        System.out.println("service/ReportServiceImpl.persistToLocal");
         persistToLocal(request);
+        System.out.println("service/ReportServiceImpl.sendDirectRequests");
         sendDirectRequests(request);
         return new ReportVO(reportRequestRepo.findById(request.getReqId()).orElseThrow());
     }
+
     //TODO:Change to parallel process using Threadpool? CompletableFuture?
     private void sendDirectRequests(ReportRequest request) {
-        RestTemplate rs = new RestTemplate();
-        ExcelResponse excelResponse = new ExcelResponse();
-        PDFResponse pdfResponse = new PDFResponse();
-        try {
-            excelResponse = rs.postForEntity("http://localhost:8888/excel", request, ExcelResponse.class).getBody();
-        } catch(Exception e){
-            log.error("Excel Generation Error (Sync) : e", e);
-            excelResponse.setReqId(request.getReqId());
-            excelResponse.setFailed(true);
-        } finally {
-            updateLocal(excelResponse);
+
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+
+        ExcelThread excelThread = new ExcelThread(request);
+        executor.execute(excelThread);
+
+        PDFThread pdfThread = new PDFThread(request);
+        executor.execute(pdfThread);
+    }
+
+    private class ExcelThread extends Thread {
+        ReportRequest request;
+        public ExcelThread (ReportRequest request) {
+            this.request = request;
         }
-        try {
-            pdfResponse = rs.postForEntity("http://localhost:9999/pdf", request, PDFResponse.class).getBody();
-        } catch(Exception e){
-            log.error("PDF Generation Error (Sync) : e", e);
-            pdfResponse.setReqId(request.getReqId());
-            pdfResponse.setFailed(true);
-        } finally {
-            updateLocal(pdfResponse);
+
+        public void run() {
+            ExcelResponse excelResponse = new ExcelResponse();
+            RestTemplate rs = new RestTemplate();
+            try {
+                System.out.println("call excel service");
+                excelResponse = rs.postForEntity("http://localhost:8888/excel", request, ExcelResponse.class).getBody();
+            } catch(Exception e){
+                log.error("Excel Generation Error (Sync) : e", e);
+                excelResponse.setReqId(request.getReqId());
+                excelResponse.setFailed(true);
+            } finally {
+                updateLocal(excelResponse);
+            }
+        }
+    }
+
+    private class PDFThread extends Thread {
+        ReportRequest request;
+        public PDFThread (ReportRequest request) {
+            this.request = request;
+        }
+        RestTemplate rs = new RestTemplate();
+        PDFResponse pdfResponse = new PDFResponse();
+
+        public void run() {
+            try {
+                System.out.println("call PDF service");
+                pdfResponse = rs.postForEntity("http://localhost:9999/pdf", request, PDFResponse.class).getBody();
+            } catch(Exception e){
+                log.error("PDF Generation Error (Sync) : e", e);
+                pdfResponse.setReqId(request.getReqId());
+                pdfResponse.setFailed(true);
+            } finally {
+                updateLocal(pdfResponse);
+            }
         }
     }
 
@@ -136,7 +172,7 @@ public class ReportServiceImpl implements ReportService {
         }
         entity.setUpdatedTime(LocalDateTime.now());
         reportRequestRepo.save(entity);
-        String to = "dawei.zhuang@antra.com";
+        String to = "test2021666888@gmail.com";
         emailService.sendEmail(to, EmailType.SUCCESS, entity.getSubmitter());
     }
 
@@ -156,7 +192,7 @@ public class ReportServiceImpl implements ReportService {
         }
         entity.setUpdatedTime(LocalDateTime.now());
         reportRequestRepo.save(entity);
-        String to = "dawei.zhuang@antra.com";
+        String to = "test2021666888@gmail.com";
         emailService.sendEmail(to, EmailType.SUCCESS, entity.getSubmitter());
     }
 

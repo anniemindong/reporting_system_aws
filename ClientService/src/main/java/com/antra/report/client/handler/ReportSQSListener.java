@@ -20,14 +20,14 @@ public class ReportSQSListener {
 
     @SqsListener("PDF_Response_Queue")
     public void responseQueueListenerPdf(SqsResponse response) {
-        log.info("Get response from sqs : {}", response);
+        log.info("handler/ReportSQSListener: Get response from sqs : {}", response);
         //queueListener(request.getPdfRequest());
         reportService.updateAsyncPDFReport(response);
     }
 
     @SqsListener("Excel_Response_Queue")
     public void responseQueueListenerExcel(SqsResponse response) {
-        log.info("Get response from sqs : {}", response);
+        log.info("handler/ReportSQSListener:Get response from sqs : {}", response);
         //queueListener(request.getPdfRequest());
         reportService.updateAsyncExcelReport(response);
     }

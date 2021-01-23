@@ -38,6 +38,7 @@ public class ReportController {
     @PostMapping("/report/sync")
     public ResponseEntity<GeneralResponse> createReportDirectly(@RequestBody @Validated ReportRequest request) {
         log.info("Got Request to generate report - sync: {}", request);
+        String test = request.getDescription();
         request.setDescription(String.join(" - ", "Sync", request.getDescription()));
         return ResponseEntity.ok(new GeneralResponse(reportService.generateReportsSync(request)));
     }
@@ -47,6 +48,7 @@ public class ReportController {
         log.info("Got Request to generate report - async: {}", request);
         request.setDescription(String.join(" - ", "Async", request.getDescription()));
         reportService.generateReportsAsync(request);
+        //ReportVO test = reportService.generateReportsAsync(request);
         return ResponseEntity.ok(new GeneralResponse());
     }
 
