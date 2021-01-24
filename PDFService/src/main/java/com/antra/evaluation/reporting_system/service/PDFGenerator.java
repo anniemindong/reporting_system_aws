@@ -10,11 +10,13 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,18 @@ public class PDFGenerator {
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(itemList);
 
         try {
-            File jaspFile = ResourceUtils.getFile("classpath:Coffee_Landscape.jasper");
+            Resource resource = new ClassPathResource("Coffee_Landscape.jasper");
+
+            InputStream inputStream = resource.getInputStream();
+
+            byte[] buffer = new byte[inputStream.available()];
+            inputStream.read(buffer);
+
+            File jaspFile = new File("Coffee_Landscape_copy.jasper");
+            OutputStream outStream = new FileOutputStream(jaspFile);
+            outStream.write(buffer);
+
+//            File jaspFile = ResourceUtils.getFile("classpath:Coffee_Landscape.jasper");
             JasperPrint jprint = JasperFillManager.fillReport(jaspFile.getAbsolutePath(), parameters, dataSource);
             File temp = File.createTempFile(request.getSubmitter(),"_tmp.pdf");
             JasperExportManager.exportReportToPdfFile(jprint, temp.getAbsolutePath());

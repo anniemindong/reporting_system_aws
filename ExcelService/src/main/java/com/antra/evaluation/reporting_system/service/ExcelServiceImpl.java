@@ -114,4 +114,8 @@ public class ExcelServiceImpl implements ExcelService {
         );
         return sheets;
     }
+
+    public double divide(double a, double b) {
+        return a / b;
+    }
 }
