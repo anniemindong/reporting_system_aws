@@ -28,24 +28,25 @@ public class PDFGenerationController {
 
 
     @PostMapping("/pdf")
-    public ResponseEntity<PDFResponse> createPDF(@RequestBody @Validated PDFRequest request) {
-        log.info("Got request to generate PDF: {}", request);
-
-        PDFResponse response = new PDFResponse();
-        PDFFile file = null;
-        response.setReqId(request.getReqId());
-
-        try {
-            file = pdfService.createPDF(request);
-            response.setFileId(file.getId());
-            response.setFileLocation(file.getFileLocation());
-            response.setFileSize(file.getFileSize());
-            log.info("Generated: {}", file);
-        } catch (Exception e) {
-            response.setFailed(true);
-            log.error("Error in generating pdf", e);
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<PDFResponse> createPDF(Object request) {
+        return null;
+//        log.info("Got request to generate PDF: {}", request);
+//
+//        PDFResponse response = new PDFResponse();
+//        PDFFile file = null;
+//        response.setReqId(request.getReqId());
+//
+//        try {
+//            file = pdfService.createPDF(request);
+//            response.setFileId(file.getId());
+//            response.setFileLocation(file.getFileLocation());
+//            response.setFileSize(file.getFileSize());
+//            log.info("Generated: {}", file);
+//        } catch (Exception e) {
+//            response.setFailed(true);
+//            log.error("Error in generating pdf", e);
+//        }
+//        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

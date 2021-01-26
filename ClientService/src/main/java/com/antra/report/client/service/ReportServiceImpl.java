@@ -17,9 +17,11 @@ import com.antra.report.client.repository.ReportRequestRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -34,7 +36,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
+//@Component
 public class ReportServiceImpl implements ReportService {
+
+
+    @Autowired
+    private RestTemplate restTemplate;
+
     private static final Logger log = LoggerFactory.getLogger(ReportServiceImpl.class);
 
     private final ReportRequestRepo reportRequestRepo;
@@ -97,13 +105,16 @@ public class ReportServiceImpl implements ReportService {
         public ExcelThread (ReportRequest request) {
             this.request = request;
         }
+//
+//        @Autowired
+//        private RestTemplate restTemplate;
 
         public void run() {
             ExcelResponse excelResponse = new ExcelResponse();
-            RestTemplate rs = new RestTemplate();
+//            RestTemplate rs = new RestTemplate();
             try {
                 System.out.println("call excel service");
-                excelResponse = rs.postForEntity("http://localhost:8888/excel", request, ExcelResponse.class).getBody();
+                excelResponse = restTemplate.postForEntity("http://excel-service/excel", request, ExcelResponse.class).getBody();
             } catch(Exception e){
                 log.error("Excel Generation Error (Sync) : e", e);
                 excelResponse.setReqId(request.getReqId());
@@ -119,13 +130,13 @@ public class ReportServiceImpl implements ReportService {
         public PDFThread (ReportRequest request) {
             this.request = request;
         }
-        RestTemplate rs = new RestTemplate();
+//        RestTemplate rs = new RestTemplate();
         PDFResponse pdfResponse = new PDFResponse();
 
         public void run() {
             try {
                 System.out.println("call PDF service");
-                pdfResponse = rs.postForEntity("http://localhost:9999/pdf", request, PDFResponse.class).getBody();
+                pdfResponse = restTemplate.postForEntity("http://pdf-service/pdf", request, PDFResponse.class).getBody();
             } catch(Exception e){
                 log.error("PDF Generation Error (Sync) : e", e);
                 pdfResponse.setReqId(request.getReqId());
