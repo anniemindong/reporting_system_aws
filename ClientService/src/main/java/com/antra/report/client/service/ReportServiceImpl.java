@@ -82,7 +82,6 @@ public class ReportServiceImpl implements ReportService {
 
     //TODO:Change to parallel process using Threadpool? CompletableFuture?
     private void sendDirectRequests(ReportRequest request) {
-
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
 
         ExcelThread excelThread = new ExcelThread(request);
@@ -229,5 +228,10 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return null;
+    }
+
+    @Override
+    public void deleteFile(String reqId) {
+        reportRequestRepo.deleteById(reqId);
     }
 }

@@ -65,9 +65,11 @@ function downloadFile(urlToSend) {
     req.send();
 }
 function showDelete(reqId){
-    if(confirm("Are you sure to delete report?")){
-        //alert('Not implemented');
-    }
+    // if(confirm("Are you sure to delete report?")){
+    //     //alert('Not implemented');
+    // }
+    deleteFile()
+
 }
 function actionLinks(ps, es, id) {
     return (ps === 'COMPLETED'?"<a onclick='downloadPDF(\""+id+"\")' href='#'>Download PDF</a>":"")
