@@ -39,31 +39,41 @@ public class PDFGenerator {
         List<Object> itemList = List.of("Empty");
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(itemList);
 
-        try {
-            Resource resource = new ClassPathResource("Coffee_Landscape.jasper");
+        final int MAX_ATTEMPTS = 5;
+        int attempts = 0;
+        while (attempts < MAX_ATTEMPTS) {
+            attempts++;
+            try {
+                Resource resource = new ClassPathResource("Coffee_Landscape.jasper");
 
-            InputStream inputStream = resource.getInputStream();
+                InputStream inputStream = resource.getInputStream();
 
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
+                byte[] buffer = new byte[inputStream.available()];
+                inputStream.read(buffer);
 
-            File jaspFile = new File("Coffee_Landscape_copy.jasper");
-            OutputStream outStream = new FileOutputStream(jaspFile);
-            outStream.write(buffer);
+                File jaspFile = new File("Coffee_Landscape_copy.jasper");
+                OutputStream outStream = new FileOutputStream(jaspFile);
+                outStream.write(buffer);
 
-//            File jaspFile = ResourceUtils.getFile("classpath:Coffee_Landscape.jasper");
-            JasperPrint jprint = JasperFillManager.fillReport(jaspFile.getAbsolutePath(), parameters, dataSource);
-            File temp = File.createTempFile(request.getSubmitter(),"_tmp.pdf");
-            JasperExportManager.exportReportToPdfFile(jprint, temp.getAbsolutePath());
-            PDFFile generatedFile = new PDFFile();
-            generatedFile.setFileLocation(temp.getAbsolutePath());
-            generatedFile.setFileName(temp.getName());
-            generatedFile.setFileSize(temp.length());
-            log.info("Generated PDF file: {}", generatedFile);
-            return generatedFile;
-        } catch (IOException | JRException e) {
-            log.error("Error in generating PDF file",e);
-            throw new PDFGenerationException();
+                //            File jaspFile = ResourceUtils.getFile("classpath:Coffee_Landscape.jasper");
+                JasperPrint jprint = JasperFillManager.fillReport(jaspFile.getAbsolutePath(), parameters, dataSource);
+                File temp = File.createTempFile(request.getSubmitter(), "_tmp.pdf");
+                JasperExportManager.exportReportToPdfFile(jprint, temp.getAbsolutePath());
+                PDFFile generatedFile = new PDFFile();
+                generatedFile.setFileLocation(temp.getAbsolutePath());
+                generatedFile.setFileName(temp.getName());
+                generatedFile.setFileSize(temp.length());
+                log.info("Generated PDF file: {}", generatedFile);
+                return generatedFile;
+            } catch (IOException | JRException e) {
+                log.error("Error in generating PDF file", e);
+            }
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                log.error("Sleep interrupted", e);
+            }
         }
+        throw new PDFGenerationException();
     }
 }
