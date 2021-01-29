@@ -6,5 +6,4 @@
 4. Convert sync API into microservices by adding Eureka support.
 5. Add pressure tests to benchmark the system.
 6. Make the system more robust by adding fault tolerance: retry.
-7. Fix bugs.
 
