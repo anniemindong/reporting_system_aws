@@ -97,7 +97,7 @@ public class ReportServiceImpl implements ReportService {
             this.request = request;
         }
 
-        public void run() {
+        public void start() {
             ExcelResponse excelResponse = new ExcelResponse();
             RestTemplate rs = new RestTemplate();
             try {
@@ -121,7 +121,7 @@ public class ReportServiceImpl implements ReportService {
         RestTemplate rs = new RestTemplate();
         PDFResponse pdfResponse = new PDFResponse();
 
-        public void run() {
+        public void start() {
             try {
                 System.out.println("call PDF service");
                 pdfResponse = rs.postForEntity("http://localhost:9999/pdf", request, PDFResponse.class).getBody();
